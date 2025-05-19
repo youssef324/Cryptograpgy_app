@@ -1,0 +1,40 @@
+# Cryptographic Toolkit Requirements
+# Python 3.8+ required
+
+# Core GUI Dependencies
+tk>=8.6
+ttkthemes>=3.2.2
+
+# Clipboard Functionality
+pyperclip>=1.8.2
+
+# Optional (for executable building)
+pyinstaller>=5.0 ; extra == 'build'
+
+# Development extras
+pytest>=7.0 ; extra == 'dev'
+black>=22.0 ; extra == 'dev'
+Key Features:
+Minimal Requirements: Only 3 essential packages
+
+Version Pinning: Specifies minimum working versions
+
+Optional Extras:
+
+build for creating executables
+
+dev for development/testing
+
+Usage Instructions:
+Basic Installation:
+
+bash
+pip install -r requirements.txt
+With Build Tools:
+
+bash
+pip install -r requirements.txt --extra-index-url build
+For Development:
+
+bash
+pip install -r requirements.txt --extra-index-url dev
