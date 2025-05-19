@@ -36,7 +36,8 @@
 - Dark/light mode theming
 - Random key generation
 - Operation history logging
-#File Structure
+
+### File Structure
 Cryptograpgy_app/
 ├── cryptographic_toolkit.py  # Main application (600+ LOC)
 ├── requirements.txt          # Dependency list
@@ -47,8 +48,7 @@ Cryptograpgy_app/
 
 💻 Installation & Execution
 Windows/Linux/macOS
-
-bash:
+bash
 # Clone repository
 git clone https://github.com/youssef324/Cryptograpgy_app.git
 cd Cryptograpgy_app
@@ -71,7 +71,3 @@ For bug reports or feature requests, open an issue at:
 https://github.com/youssef324/Cryptograpgy_app/issues
 
 
-
-tk>=8.6
-ttkthemes>=3.2.2
-pyperclip>=1.8.2
