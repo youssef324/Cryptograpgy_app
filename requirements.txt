@@ -26,15 +26,15 @@ build for creating executables
 dev for development/testing
 
 Usage Instructions:
-Basic Installation:
+Basic Installation: pip install -r requirements.txt
 
 bash
 pip install -r requirements.txt
-With Build Tools:
+With Build Tools: pip install -r requirements.txt 
 
 bash
-pip install -r requirements.txt --extra-index-url build
-For Development:
+pip install -r requirements.txt 
+For Development: pip install -r requirements.txt 
 
 bash
-pip install -r requirements.txt --extra-index-url dev
+pip install -r requirements.txt 
