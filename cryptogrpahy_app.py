@@ -355,26 +355,26 @@ Output: {output_text}
         self.playfair_key.set(key)
     
     def playfair_encrypt(self):
-        plaintext = self.playfair_input.get("1.0", tk.END).strip().upper()
-        key = self.playfair_key.get().upper()
-        
+        plaintext = self.playfair_input.get("1.0", tk.END).strip().replace(" ", "").upper()
+        key = self.playfair_key.get().strip().replace(" ", "").upper()
+
         if not key.isalpha():
-            messagebox.showerror("Error", "Key must contain only letters")
+            messagebox.showerror("Error", "Key must contain only letters and no spaces")
             return
-        
+
         ciphertext = self.playfair_cipher(plaintext, key, encrypt=True)
         self.playfair_output.delete('1.0', tk.END)
         self.playfair_output.insert(tk.END, ciphertext)
         self.add_to_summary("Encryption", "Playfair Cipher", plaintext, ciphertext, key)
-    
+
     def playfair_decrypt(self):
-        ciphertext = self.playfair_input.get("1.0", tk.END).strip().upper()
-        key = self.playfair_key.get().upper()
-        
+        ciphertext = self.playfair_input.get("1.0", tk.END).strip().replace(" ", "").upper()
+        key = self.playfair_key.get().strip().replace(" ", "").upper()
+
         if not key.isalpha():
-            messagebox.showerror("Error", "Key must contain only letters")
+            messagebox.showerror("Error", "Key must contain only letters and no spaces")
             return
-        
+
         plaintext = self.playfair_cipher(ciphertext, key, encrypt=False)
         self.playfair_output.delete('1.0', tk.END)
         self.playfair_output.insert(tk.END, plaintext)
@@ -583,26 +583,26 @@ Output: {output_text}
         self.rowcolumn_key.set(key)
     
     def rowcolumn_encrypt(self):
-        plaintext = self.rowcolumn_input.get("1.0", tk.END).strip().upper()
-        key = self.rowcolumn_key.get().upper()
-        
+        plaintext = self.rowcolumn_input.get("1.0", tk.END).strip().replace(" ", "").upper()
+        key = self.rowcolumn_key.get().strip().replace(" ", "").upper()
+
         if not key.isalpha():
-            messagebox.showerror("Error", "Key must contain only letters")
+            messagebox.showerror("Error", "Key must contain only letters and no spaces")
             return
-        
+
         ciphertext = self.rowcolumn_cipher(plaintext, key, encrypt=True)
         self.rowcolumn_output.delete('1.0', tk.END)
         self.rowcolumn_output.insert(tk.END, ciphertext)
         self.add_to_summary("Encryption", "Row-Column Transposition", plaintext, ciphertext, key)
-    
+
     def rowcolumn_decrypt(self):
-        ciphertext = self.rowcolumn_input.get("1.0", tk.END).strip().upper()
-        key = self.rowcolumn_key.get().upper()
-        
+        ciphertext = self.rowcolumn_input.get("1.0", tk.END).strip().replace(" ", "").upper()
+        key = self.rowcolumn_key.get().strip().replace(" ", "").upper()
+
         if not key.isalpha():
-            messagebox.showerror("Error", "Key must contain only letters")
+            messagebox.showerror("Error", "Key must contain only letters and no spaces")
             return
-        
+
         plaintext = self.rowcolumn_cipher(ciphertext, key, encrypt=False)
         self.rowcolumn_output.delete('1.0', tk.END)
         self.rowcolumn_output.insert(tk.END, plaintext)
