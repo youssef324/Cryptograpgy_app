@@ -788,20 +788,30 @@ Output: {output_text}
         # Generate appropriate keys based on selected algorithms
         first_algo = self.first_algo.get()
         second_algo = self.second_algo.get()
-        
+
+        # Generate key for first algorithm
         if first_algo == "Caesar Cipher":
-            self.generate_caesar_key()
+            self.first_key.set(str(random.randint(1, 25)))
         elif first_algo == "Vigenère Cipher":
-            self.generate_vigenere_key()
+            length = random.randint(5, 10)
+            key = ''.join(random.choice(string.ascii_uppercase) for _ in range(length))
+            self.first_key.set(key)
         elif first_algo == "Playfair Cipher":
-            self.generate_playfair_key()
+            length = random.randint(5, 10)
+            key = ''.join(random.choice(string.ascii_uppercase.replace('J', '')) for _ in range(length))
+            self.first_key.set(key)
         elif first_algo == "Rail Fence Cipher":
-            self.generate_railfence_key()
+            self.first_key.set(str(random.randint(2, 10)))
         elif first_algo == "Row-Column Transposition":
-            self.generate_rowcolumn_key()
+            length = random.randint(5, 10)
+            key = ''.join(random.choice(string.ascii_uppercase) for _ in range(length))
+            self.first_key.set(key)
         elif first_algo == "Mono-alphabetic Substitution":
-            self.generate_monoalphabetic_key()
-        
+            letters = list(string.ascii_uppercase)
+            random.shuffle(letters)
+            self.first_key.set(''.join(letters))
+
+        # Generate key for second algorithm
         if second_algo == "Caesar Cipher":
             self.second_key.set(str(random.randint(1, 25)))
         elif second_algo == "Vigenère Cipher":
