@@ -104,11 +104,6 @@ def playfair_encrypt(self):
 
 ---
 
-## 📸 Screenshots
-
-*(Add screenshots here!)*
-
----
 
 ## 👤 Author
 
