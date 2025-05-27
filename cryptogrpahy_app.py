@@ -11,19 +11,20 @@ class CipherApp:
         self.root = root
         self.root.title("Cryptographic Toolkit")
         self.root.geometry("1000x700")
-        
+
         # Set theme
-        self.dark_mode = True
+        self.dark_mode = False  # Start with light mode
         self.set_theme()
-        
+        self.setup_styles()
+
         # Create main container
         self.main_frame = ttk.Frame(self.root)
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        
+
         # Create notebook for cipher selection
         self.notebook = ttk.Notebook(self.main_frame)
         self.notebook.pack(fill=tk.BOTH, expand=True)
-        
+
         # Create cipher frames
         self.create_caesar_frame()
         self.create_vigenere_frame()
@@ -32,25 +33,287 @@ class CipherApp:
         self.create_rowcolumn_frame()
         self.create_monoalphabetic_frame()
         self.create_double_cipher_frame()
-        
+        self.create_sdes_frame()  # Create S-DES frame
+
         # Create summary panel
         self.summary_visible = False
         self.create_summary_panel()
-        
+
         # Create menu
         self.create_menu()
-        
+
     def set_theme(self):
         if self.dark_mode:
             self.root.set_theme("black")
-            self.text_bg = "#2d2d2d"
-            self.text_fg = "#ffffff"
-            self.button_bg = "#3d3d3d"
+            self.text_bg = "#232946"      # Deep blue background for text
+            self.text_fg = "#eebbc3"      # Soft pink text
+            self.button_bg = "#393e46"    # Darker blue for buttons
+            self.button_fg = "#eebbc3"    # Soft pink text on buttons
+            self.frame_bg = "#121629"     # Very dark blue for frames
+            self.label_fg = "#eebbc3"     # Soft pink for labels
         else:
             self.root.set_theme("arc")
-            self.text_bg = "#ffffff"
-            self.text_fg = "#000000"
-            self.button_bg = "#f5f6f7"
+            self.text_bg = "#f4f6fb"      # Very light blue background for text
+            self.text_fg = "#232946"      # Deep blue text
+            self.button_bg = "#6557ff"    # Vibrant purple for buttons
+            self.button_fg = "#ffffff"    # White text on buttons
+            self.frame_bg = "#ffffff"     # White for frames
+            self.label_fg = "#6557ff"     # Vibrant purple for labels
+
+    def setup_styles(self):
+        style = ttk.Style(self.root)
+        style.theme_use("arc")
+        style.configure("TFrame", background=self.frame_bg)
+        style.configure("TLabel", background=self.frame_bg, foreground=self.label_fg, font=("Segoe UI", 12, "bold"))
+        style.configure(
+            "Accent.TButton",
+            background=self.button_bg,
+            foreground=self.button_fg,
+            font=("Segoe UI", 11, "bold"),
+            borderwidth=0,
+            focusthickness=3,
+            focuscolor=self.button_bg,
+            padding=10
+        )
+        style.map(
+            "Accent.TButton",
+            background=[("active", "#232946"), ("pressed", "#393e46")],
+            foreground=[("active", "#eebbc3"), ("pressed", "#eebbc3")]
+        )
+        style.layout("Accent.TButton", [
+            ('Button.border', {'sticky': 'nswe', 'children': [
+                ('Button.focus', {'sticky': 'nswe', 'children': [
+                    ('Button.padding', {'sticky': 'nswe', 'children': [
+                        ('Button.label', {'sticky': 'nswe'})
+                    ]})
+                ]})
+            ]})
+        ])
+    
+    # Update create_action_buttons to use the new style
+    def create_action_buttons(self, parent, encrypt_callback, decrypt_callback):
+        frame = ttk.Frame(parent)
+        encrypt_btn = ttk.Button(frame, text="Encrypt", command=encrypt_callback, style="Pink.TButton")
+        encrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
+
+        decrypt_btn = ttk.Button(frame, text="Decrypt", command=decrypt_callback, style="Pink.TButton")
+        decrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
+
+        clear_btn = ttk.Button(frame, text="Clear", command=lambda: self.clear_text_widgets(parent), style="Pink.TButton")
+        clear_btn.pack(side=tk.LEFT, padx=5, pady=5)
+
+        return frame
+
+    # Update create_key_frame to use the new style for buttons
+    def create_key_frame(self, parent, key_var, key_name="Key", generate_callback=None):
+        frame = ttk.Frame(parent)
+        ttk.Label(frame, text=f"{key_name}:").pack(side=tk.LEFT, padx=5)
+        key_entry = ttk.Entry(frame, textvariable=key_var, width=30)
+        key_entry.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
+
+        if generate_callback:
+            generate_btn = ttk.Button(frame, text="Generate", command=generate_callback, style="Pink.TButton")
+            generate_btn.pack(side=tk.LEFT, padx=5)
+
+        copy_btn = ttk.Button(frame, text="Copy", command=lambda: self.copy_to_clipboard(key_var.get()), style="Pink.TButton")
+        copy_btn.pack(side=tk.LEFT, padx=5)
+
+        return frame
+
+    # In create_double_cipher_frame, update button styles as well:
+    def create_double_cipher_frame(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Double Cipher")
+
+        # Algorithm selection
+        algo_frame = ttk.Frame(frame)
+        ttk.Label(algo_frame, text="First Algorithm:").pack(side=tk.LEFT, padx=5)
+        self.first_algo = ttk.Combobox(algo_frame, values=[
+            "Caesar Cipher", "Vigenère Cipher", "Playfair Cipher", 
+            "Rail Fence Cipher", "Row-Column Transposition", "Mono-alphabetic Substitution",
+            "S-DES"  # Add S-DES to the list
+        ], state="readonly")
+        self.first_algo.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
+        
+        ttk.Label(algo_frame, text="Second Algorithm:").pack(side=tk.LEFT, padx=5)
+        self.second_algo = ttk.Combobox(algo_frame, values=[
+            "Caesar Cipher", "Vigenère Cipher", "Playfair Cipher", 
+            "Rail Fence Cipher", "Row-Column Transposition", "Mono-alphabetic Substitution",
+            "S-DES"  # Add S-DES to the list
+        ], state="readonly")
+        self.second_algo.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
+        algo_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Input/Output
+        io_frame, self.double_cipher_input, self.double_cipher_output = self.create_input_output_frame(frame)
+        io_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Key frames
+        key_frame = ttk.Frame(frame)
+        
+        self.first_key = tk.StringVar()
+        first_key_frame = self.create_key_frame(key_frame, self.first_key, "First Key")
+        first_key_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.second_key = tk.StringVar()
+        second_key_frame = self.create_key_frame(key_frame, self.second_key, "Second Key")
+        second_key_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        key_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Buttons
+        btn_frame = ttk.Frame(frame)
+        encrypt_btn = ttk.Button(btn_frame, text="Double Encrypt", command=self.double_encrypt, style="Pink.TButton")
+        encrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        decrypt_btn = ttk.Button(btn_frame, text="Double Decrypt", command=self.double_decrypt, style="Pink.TButton")
+        decrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        clear_btn = ttk.Button(btn_frame, text="Clear", command=lambda: self.clear_text_widgets(frame), style="Pink.TButton")
+        clear_btn.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        generate_keys_btn = ttk.Button(btn_frame, text="Generate Keys", command=self.generate_double_keys, style="Pink.TButton")
+        generate_keys_btn.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        btn_frame.pack(fill=tk.X, padx=5, pady=5)
+
+    # --- S-DES Cipher Implementation ---
+    def create_sdes_frame(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="S-DES")
+
+        # Input/Output
+        io_frame, self.sdes_input, self.sdes_output = self.create_input_output_frame(frame)
+        io_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Key
+        self.sdes_key = tk.StringVar(value="1010000010")
+        key_frame = self.create_key_frame(frame, self.sdes_key, "10-bit Key")
+        key_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        # Buttons
+        btn_frame = self.create_action_buttons(frame, self.sdes_encrypt, self.sdes_decrypt)
+        btn_frame.pack(fill=tk.X, padx=5, pady=5)
+    
+    def generate_sdes_key(self):
+        # Generate a random 10-bit binary key
+        key = ''.join(random.choice('01') for _ in range(10))
+        self.sdes_key.set(key)
+    
+    def sdes_encrypt(self):
+        plaintext = self.sdes_input.get("1.0", tk.END).strip()
+        key = self.sdes_key.get().strip()
+        if not self.validate_sdes_key(key):
+            messagebox.showerror("Error", "Key must be a 10-bit binary string (e.g., 1010000010)")
+            return
+        if not self.validate_sdes_text(plaintext):
+            messagebox.showerror("Error", "Plaintext must be 8-bit binary string(s), separated by spaces")
+            return
+        ciphertext = ' '.join([self.sdes_encrypt_block(block, key) for block in plaintext.split()])
+        self.sdes_output.delete('1.0', tk.END)
+        self.sdes_output.insert(tk.END, ciphertext)
+        self.add_to_summary("Encryption", "S-DES", plaintext, ciphertext, key)
+
+    def sdes_decrypt(self):
+        ciphertext = self.sdes_input.get("1.0", tk.END).strip()
+        key = self.sdes_key.get().strip()
+        if not self.validate_sdes_key(key):
+            messagebox.showerror("Error", "Key must be a 10-bit binary string (e.g., 1010000010)")
+            return
+        if not self.validate_sdes_text(ciphertext):
+            messagebox.showerror("Error", "Ciphertext must be 8-bit binary string(s), separated by spaces")
+            return
+        plaintext = ' '.join([self.sdes_decrypt_block(block, key) for block in ciphertext.split()])
+        self.sdes_output.delete('1.0', tk.END)
+        self.sdes_output.insert(tk.END, plaintext)
+        self.add_to_summary("Decryption", "S-DES", ciphertext, plaintext, key)
+
+    def validate_sdes_key(self, key):
+        return len(key) == 10 and all(c in '01' for c in key)
+
+    def validate_sdes_text(self, text):
+        return all(len(block) == 8 and all(c in '01' for c in block) for block in text.split())
+
+    # --- S-DES Core Functions ---
+    def sdes_encrypt_block(self, block, key):
+        K1, K2 = self.sdes_generate_keys(key)
+        return self.sdes_fk(block, K1, K2)
+
+    def sdes_decrypt_block(self, block, key):
+        K1, K2 = self.sdes_generate_keys(key)
+        return self.sdes_fk(block, K2, K1)
+
+    def sdes_generate_keys(self, key):
+        # Permutation functions
+        def permute(bits, order):
+            return ''.join(bits[i] for i in order)
+        # Left shift
+        def left_shift(bits, n):
+            return bits[n:] + bits[:n]
+        # P10 and P8
+        P10 = [2, 4, 1, 6, 3, 9, 0, 8, 7, 5]
+        P8 = [5, 2, 6, 3, 7, 4, 9, 8]
+        # Key generation
+        key_p10 = permute(key, P10)
+        left, right = key_p10[:5], key_p10[5:]
+        left1, right1 = left_shift(left, 1), left_shift(right, 1)
+        K1 = permute(left1 + right1, P8)
+        left2, right2 = left_shift(left1, 2), left_shift(right1, 2)
+        K2 = permute(left2 + right2, P8)
+        return K1, K2
+
+    def sdes_fk(self, bits, K1, K2):
+        # Initial and inverse permutations
+        IP = [1, 5, 2, 0, 3, 7, 4, 6]
+        IP_inv = [3, 0, 2, 4, 6, 1, 7, 5]
+        # Expansion/permutation, S-boxes, P4
+        EP = [3, 0, 1, 2, 1, 2, 3, 0]
+        S0 = [
+            [1, 0, 3, 2],
+            [3, 2, 1, 0],
+            [0, 2, 1, 3],
+            [3, 1, 3, 2]
+        ]
+        S1 = [
+            [0, 1, 2, 3],
+            [2, 0, 1, 3],
+            [3, 0, 1, 0],
+            [2, 1, 0, 3]
+        ]
+        P4 = [1, 3, 2, 0]
+
+        def permute(bits, order):
+            return ''.join(bits[i] for i in order)
+
+        def xor(bits1, bits2):
+            return ''.join('0' if b1 == b2 else '1' for b1, b2 in zip(bits1, bits2))
+
+        def sbox(bits, box):
+            row = int(bits[0] + bits[3], 2)
+            col = int(bits[1] + bits[2], 2)
+            val = box[row][col]
+            return f"{val:02b}"
+
+        def f_k(bits, key):
+            left, right = bits[:4], bits[4:]
+            right_exp = permute(right, EP)
+            temp = xor(right_exp, key)
+            s0 = sbox(temp[:4], S0)
+            s1 = sbox(temp[4:], S1)
+            p4 = permute(s0 + s1, P4)
+            return xor(left, p4) + right
+
+        # Initial permutation
+        bits = permute(bits, IP)
+        # First round
+        bits = f_k(bits, K1)
+        # Swap
+        bits = bits[4:] + bits[:4]
+        # Second round
+        bits = f_k(bits, K2)
+        # Inverse initial permutation
+        bits = permute(bits, IP_inv)
+        return bits
     
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -164,34 +427,6 @@ Output: {output_text}
         output_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         return frame, input_text, output_text
-    
-    def create_key_frame(self, parent, key_var, key_name="Key", generate_callback=None):
-        frame = ttk.Frame(parent)
-        ttk.Label(frame, text=f"{key_name}:").pack(side=tk.LEFT, padx=5)
-        key_entry = ttk.Entry(frame, textvariable=key_var, width=30)
-        key_entry.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
-        
-        if generate_callback:
-            generate_btn = ttk.Button(frame, text="Generate", command=generate_callback)
-            generate_btn.pack(side=tk.LEFT, padx=5)
-        
-        copy_btn = ttk.Button(frame, text="Copy", command=lambda: self.copy_to_clipboard(key_var.get()))
-        copy_btn.pack(side=tk.LEFT, padx=5)
-        
-        return frame
-    
-    def create_action_buttons(self, parent, encrypt_callback, decrypt_callback):
-        frame = ttk.Frame(parent)
-        encrypt_btn = ttk.Button(frame, text="Encrypt", command=encrypt_callback)
-        encrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
-        
-        decrypt_btn = ttk.Button(frame, text="Decrypt", command=decrypt_callback)
-        decrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
-        
-        clear_btn = ttk.Button(frame, text="Clear", command=lambda: self.clear_text_widgets(parent))
-        clear_btn.pack(side=tk.LEFT, padx=5, pady=5)
-        
-        return frame
     
     def clear_text_widgets(self, parent):
         for widget in parent.winfo_children():
@@ -443,20 +678,20 @@ Output: {output_text}
     def prepare_playfair_text(self, text):
         # Remove non-alphabetic characters and replace J with I
         text = ''.join(c for c in text.upper() if c.isalpha()).replace('J', 'I')
-        
-        # Insert X between double letters and at the end if odd length
         prepared = []
         i = 0
         while i < len(text):
-            if i == len(text) - 1:
-                prepared.append(text[i] + 'X')
-                break
-            elif text[i] == text[i+1]:
-                prepared.append(text[i] + 'X')
+            a = text[i]
+            b = text[i+1] if i+1 < len(text) else 'X'
+            if a == b:
+                prepared.append(a + 'X')
                 i += 1
             else:
-                prepared.append(text[i] + text[i+1])
+                prepared.append(a + b)
                 i += 2
+        # If the last pair is a single letter, pad with X
+        if len(prepared[-1]) == 1:
+            prepared[-1] += 'X'
         return ''.join(prepared)
     
     def find_in_square(self, key_square, char):
@@ -739,14 +974,16 @@ Output: {output_text}
         ttk.Label(algo_frame, text="First Algorithm:").pack(side=tk.LEFT, padx=5)
         self.first_algo = ttk.Combobox(algo_frame, values=[
             "Caesar Cipher", "Vigenère Cipher", "Playfair Cipher", 
-            "Rail Fence Cipher", "Row-Column Transposition", "Mono-alphabetic Substitution"
+            "Rail Fence Cipher", "Row-Column Transposition", "Mono-alphabetic Substitution",
+            "S-DES"  # Add S-DES to the list
         ], state="readonly")
         self.first_algo.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
         
         ttk.Label(algo_frame, text="Second Algorithm:").pack(side=tk.LEFT, padx=5)
         self.second_algo = ttk.Combobox(algo_frame, values=[
             "Caesar Cipher", "Vigenère Cipher", "Playfair Cipher", 
-            "Rail Fence Cipher", "Row-Column Transposition", "Mono-alphabetic Substitution"
+            "Rail Fence Cipher", "Row-Column Transposition", "Mono-alphabetic Substitution",
+            "S-DES"  # Add S-DES to the list
         ], state="readonly")
         self.second_algo.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
         algo_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -770,16 +1007,16 @@ Output: {output_text}
         
         # Buttons
         btn_frame = ttk.Frame(frame)
-        encrypt_btn = ttk.Button(btn_frame, text="Double Encrypt", command=self.double_encrypt)
+        encrypt_btn = ttk.Button(btn_frame, text="Double Encrypt", command=self.double_encrypt, style="Pink.TButton")
         encrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
         
-        decrypt_btn = ttk.Button(btn_frame, text="Double Decrypt", command=self.double_decrypt)
+        decrypt_btn = ttk.Button(btn_frame, text="Double Decrypt", command=self.double_decrypt, style="Pink.TButton")
         decrypt_btn.pack(side=tk.LEFT, padx=5, pady=5)
         
-        clear_btn = ttk.Button(btn_frame, text="Clear", command=lambda: self.clear_text_widgets(frame))
+        clear_btn = ttk.Button(btn_frame, text="Clear", command=lambda: self.clear_text_widgets(frame), style="Pink.TButton")
         clear_btn.pack(side=tk.LEFT, padx=5, pady=5)
         
-        generate_keys_btn = ttk.Button(btn_frame, text="Generate Keys", command=self.generate_double_keys)
+        generate_keys_btn = ttk.Button(btn_frame, text="Generate Keys", command=self.generate_double_keys, style="Pink.TButton")
         generate_keys_btn.pack(side=tk.LEFT, padx=5, pady=5)
         
         btn_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -810,6 +1047,9 @@ Output: {output_text}
             letters = list(string.ascii_uppercase)
             random.shuffle(letters)
             self.first_key.set(''.join(letters))
+        elif first_algo == "S-DES":
+            key = ''.join(random.choice('01') for _ in range(10))
+            self.first_key.set(key)
 
         # Generate key for second algorithm
         if second_algo == "Caesar Cipher":
@@ -832,6 +1072,9 @@ Output: {output_text}
             letters = list(string.ascii_uppercase)
             random.shuffle(letters)
             self.second_key.set(''.join(letters))
+        elif second_algo == "S-DES":
+            key = ''.join(random.choice('01') for _ in range(10))
+            self.second_key.set(key)
     
     def double_encrypt(self):
         plaintext = self.double_cipher_input.get("1.0", tk.END).strip()
@@ -926,6 +1169,14 @@ Output: {plaintext}
                 messagebox.showerror("Error", "Mono-alphabetic cipher key must be a 26-letter permutation")
                 return text
             return self.monoalphabetic_cipher(text, key, encrypt)
+        elif algorithm == "S-DES":
+            if not self.validate_sdes_key(key):
+                messagebox.showerror("Error", "S-DES key must be a 10-bit binary string")
+                return text
+            if encrypt:
+                return self.sdes_encrypt_block(text, key)
+            else:
+                return self.sdes_decrypt_block(text, key)
         return text
 
 def main():
