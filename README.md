@@ -114,12 +114,6 @@ def sdes_encrypt(self):
 
 ---
 
-## 📸 Screenshots
-
-*(Add screenshots here!)*
-
----
-
 ## 👤 Author
 
 Made with ❤️ by [youssef324](https://github.com/youssef324)
