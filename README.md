@@ -122,7 +122,7 @@ def sdes_encrypt(self):
 
 ## 👤 Author
 
-Made with ❤️ by [ypussef324](https://github.com/ypussef324)
+Made with ❤️ by [youssef324](https://github.com/ypussef324)
 
 ---
 
